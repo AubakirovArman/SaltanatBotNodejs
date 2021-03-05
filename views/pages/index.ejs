@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head'); %>
+</head>
+<body class="container">
+
+<header>
+    <%- include('../partials/header'); %>
+</header>
+
+<main>
+    <div class="jumbotron">
+        <h2>адрес url</h2>
+        <p><%= tagline %></p>
+        <h1>This is great</h1>
+        <p>Welcome to templating using EJS</p>
+        
+        <div id="122"></div>
+        <div id="123"></div>
+        <div id="124"></div>
+        <div id="125"></div>
+        <div id="126"></div>
+        <div id="127"></div>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+        <!-- <script>
+            var socket =io.connect();
+            socket.on('spotTicker', function(data){
+                $('#123').html("spot ticker "+data.spotTicker.bestBid)          
+            })
+            socket.on('futuresTicker', function(data){
+                $('#124').html("usdt-futures "+data.futuresTicker.bestBid)          
+            })
+
+            socket.on('futuresTickerDapi', function(data){
+                $('#122').html("coin futures "+data.futuresTickerDapi.bestAsk+" as ds "+data.futuresTickerDapi.bestBid)          
+            })
+
+
+            socket.on('spotBalance', function(data){
+                $('#125').html("")
+                if (data.spotBalance!={}){
+                    for (el in data.spotBalance){
+                        if ((data.spotBalance[el].available>0) || (data.spotBalance[el].onOrder)>0){
+                            $('#125').append("<p>"+el+" : "+data.spotBalance[el].available+" : "+data.spotBalance[el].onOrder)          
+                        }
+
+                    }
+                }
+
+            })
+
+
+            socket.on('fapiBalance', function(data){
+                $('#126').html("futures usd t balance")
+                if (data.fapiBalance!={}){
+                    for (el in data.fapiBalance){
+                        if (Number(data.fapiBalance[el].balance)>0){
+                            $('#126').append("<p>"+el+" : "+data.fapiBalance[el].balance+" : "+data.fapiBalance[el].availableBalance)          
+                        }
+
+                    }
+                }
+
+            })
+
+
+
+            socket.on('dapiBalance', function(data){
+                $('#127').html("futures coin m balance")
+                if (data.dapiBalance!={}){
+                    for (el in data.dapiBalance){
+                        if (Number(data.dapiBalance[el].balance)>0){
+                            $('#127').append("<p>"+el+" : "+data.dapiBalance[el].balance+" : "+data.dapiBalance[el].availableBalance)          
+                        }
+
+                    }
+                }
+
+            })
+        </script> -->
+    </div>
+</main>
+
+<footer>
+    <%- include('../partials/footer'); %>
+</footer>
+
+</body>
+</html>
