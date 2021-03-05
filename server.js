@@ -320,7 +320,7 @@ false,
 
 
 // index page
-var port=8000
+var port=80
 
 
 
