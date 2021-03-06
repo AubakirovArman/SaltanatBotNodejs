@@ -1,5 +1,6 @@
 let binancespot=require('./binancespot')
 let http = require('request')
+let bir=require('./server');
 
 
 // ////binance
@@ -50,7 +51,7 @@ var obrabotka = function(mesage,global){
     mesage=mesage.toLowerCase();
     let t = mesage.split("::");
     for (var i = 0; i < t.length; i++) {
-        console.log(t[i])
+        
         let massiv = t[i].split(';')
         let dictCommand = new Map()
         for (index in massiv) {
@@ -131,7 +132,11 @@ var obrabotka = function(mesage,global){
         if (dictCommand['leverageproc'] != undefined) { marketClass.leverageProc = dictCommand['leverageproc']; }
 
         marketClass.global=global
+
         let wait=marketClass.binanceStart()
+        bir.teleg.text=t[i]
+        bir.teleg.telegramSendText();
+        console.log(wait)
         }
         else{
             console.log('error market')

@@ -378,7 +378,6 @@ class binanceClass {
         let r = await bir.binance.futuresOrder( this.side, this.pair, this.quantity, this.price, this.param );
         bir.teleg.text=JSON.stringify(r)
         bir.teleg.telegramSendText();
-    
 
         return r
 
@@ -936,7 +935,7 @@ binanceStart() {
         }
         if (this.leverage != 0) {
           // плечо
-            this.BinanceLeverageFutures();
+            let r =this.BinanceLeverageFutures();
         }
   
         if (this.allClose != "false") {
@@ -946,17 +945,17 @@ binanceStart() {
             this.updateParametr();
             return r
           }
-          else if (this.allClose=="order"){}
+          else if (this.allClose=="order"){
             let r=this.BinanceCloseOrderIdFutures();
             this.updateParametr();
 
             return r
+          }
         }
         else {
           if ((this.dualsideposition=="true") || (this.dualsideposition=="false")){
             let r = this.BinanceChangePositionModeFutures()
             this.updateParametr();
-
             return r
           }
           else if (this.dualsideposition=="no"){
@@ -969,8 +968,6 @@ binanceStart() {
             return r
           }
           else{
-
-
             return "вы ввели не правильное значение dualsideposition"
           }
         }
