@@ -47,7 +47,7 @@ var marketDict = {
 
 
 
-var obrabotka = function(mesage,global){
+var obrabotka = async function(mesage,global){
     mesage=mesage.toLowerCase();
     let t = mesage.split("::");
     for (var i = 0; i < t.length; i++) {
@@ -133,7 +133,7 @@ var obrabotka = function(mesage,global){
 
         marketClass.global=global
 
-        let wait=marketClass.binanceStart()
+        let wait= await marketClass.binanceStart()
         bir.teleg.text=t[i]
         bir.teleg.telegramSendText();
         console.log(wait)
