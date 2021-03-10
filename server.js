@@ -326,7 +326,7 @@ var port=80
 
 
 
-app.post('/:id', function(req, res) {
+app.post('/id', function(req, res) {
     let tagline =req.hostname
     const binancelogica = require('./binancelogica')
     let r=''

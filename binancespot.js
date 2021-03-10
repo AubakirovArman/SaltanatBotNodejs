@@ -140,7 +140,7 @@ class binanceClass {
   }
 
     //////создание ордеров oco для спот
-   async BinanceCreatOrderOcoSpot() {
+  BinanceCreatOrderOcoSpot() {
 
 
     let param =  {
@@ -152,25 +152,32 @@ class binanceClass {
     this.param = param
     let r = undefined
     if (this.side=="BUY"){
-      r = await bir.binance.buy(this.pair, this.quantity, this.price, this.param, (error, response) => {
+      r =  bir.binance.buy(this.pair, this.quantity, this.price, this.param, (error, response) => {
         if (response.orderListId==undefined){
             bir.teleg.text=JSON.stringify(error.body);
             bir.teleg.telegramSendText();
+            return "done"
         }else{
           bir.teleg.text=JSON.stringify(response);
           bir.teleg.telegramSendText();
+          return "done"
+
         }
       });
     }
     else{
-      r =await bir.binance.sell(this.pair, this.quantity, this.price, this.param, (error, response) => {
+      r = bir.binance.sell(this.pair, this.quantity, this.price, this.param, (error, response) => {
         if (response.orderId==undefined){
           bir.teleg.text=JSON.stringify(error.body);
           bir.teleg.telegramSendText();
+          return "done"
+
   
         }else{
           bir.teleg.text=JSON.stringify(response);
           bir.teleg.telegramSendText();
+          return "done"
+
         }
       });
     }
@@ -179,7 +186,7 @@ class binanceClass {
   }
 
   //////создание ордеров для спот
-   async BinanceCreatOrderSpot() {
+  BinanceCreatOrderSpot() {
 
     let param={};
     param["type"]=this.type;
@@ -209,25 +216,32 @@ class binanceClass {
     console.log(this.param)
     let r = undefined
     if (this.side=="BUY"){
-      r = await bir.binance.buy(this.pair, this.quantity, this.price, this.param, (error, response) => {
+      r =  bir.binance.buy(this.pair, this.quantity, this.price, this.param, (error, response) => {
         if (response.orderId==undefined){
             bir.teleg.text=JSON.stringify(error.body);
             bir.teleg.telegramSendText();
+            return "done"
+
         }else{
           bir.teleg.text=JSON.stringify(response);
           bir.teleg.telegramSendText();
+          return "done"
+
         }
       });
     }
     else{
-      r = await bir.binance.sell(this.pair, this.quantity, this.price, this.param, (error, response) => {
+      r =  bir.binance.sell(this.pair, this.quantity, this.price, this.param, (error, response) => {
         if (response.orderId==undefined){
           bir.teleg.text=JSON.stringify(error.body);
           bir.teleg.telegramSendText();
+          return "done"
   
         }else{
           bir.teleg.text=JSON.stringify(response);
           bir.teleg.telegramSendText();
+          return "done"
+
         }
       });
     }
