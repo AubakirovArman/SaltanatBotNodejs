@@ -74,6 +74,7 @@ var obrabotka = async function(mesage,global){
         }
         if (dictCommand['origclientorderid'] != undefined) { marketClass.origClientOrderId = dictCommand['origclientorderid'] }
         if (dictCommand['newclientorderid'] != undefined) { marketClass.newClientOrderId = dictCommand['newclientorderid'] }
+        if (dictCommand['orderid'] != undefined) { marketClass.orderId = dictCommand['orderid'] }
     
         if (dictCommand['positionside'] != undefined) { marketClass.positionSide = dictCommand['positionside'].toUpperCase() }
 

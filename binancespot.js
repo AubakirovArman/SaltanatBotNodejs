@@ -140,51 +140,123 @@ class binanceClass {
   }
 
     //////создание ордеров oco для спот
-  BinanceCreatOrderOcoSpot() {
-    let param = "symbol=" + this.pair + "&side=" + this.side + "&quantity=" + this.quantity + "&price=" + this.price + "&stopPrice=" + this.stopPrice+"&stopLimitTimeInForce="+this.stopLimitTimeInForce+"&stopLimitPrice="+this.stopLimitPrice
-    this.command = "/api/v3/order/oco"
+   async BinanceCreatOrderOcoSpot() {
+
+
+    let param =  {
+                  "type":"OCO", 
+                  "stopPrice" : this.stopPrice,
+                  "stopLimitTimeInForce":this.stopLimitTimeInForce,
+                  "stopLimitPrice": this.stopLimitPrice
+                  }
     this.param = param
-    this.pos = 3
+    let r = undefined
+    if (this.side=="BUY"){
+      r = await bir.binance.buy(this.pair, this.quantity, this.price, this.param, (error, response) => {
+        if (response.orderListId==undefined){
+            bir.teleg.text=JSON.stringify(error.body);
+            bir.teleg.telegramSendText();
+        }else{
+          bir.teleg.text=JSON.stringify(response);
+          bir.teleg.telegramSendText();
+        }
+      });
+    }
+    else{
+      r =await bir.binance.sell(this.pair, this.quantity, this.price, this.param, (error, response) => {
+        if (response.orderId==undefined){
+          bir.teleg.text=JSON.stringify(error.body);
+          bir.teleg.telegramSendText();
+  
+        }else{
+          bir.teleg.text=JSON.stringify(response);
+          bir.teleg.telegramSendText();
+        }
+      });
+    }
+    return r
+
   }
 
   //////создание ордеров для спот
-  BinanceCreatOrderSpot() {
-    let param = "symbol=" + this.pair + "&side=" + this.side + "&type=" + this.type + "&newOrderRespType=" + this.newOrderRespType;
+   async BinanceCreatOrderSpot() {
+
+    let param={};
+    param["type"]=this.type;
+    param["side"]=this.side;
+
+    // param["newOrderRespType"]=this.newOrderRespType;
     if (this.type == "LIMIT") {
-      param = param + "&timeInForce=" + this.timeInForce + "&quantity=" + this.quantity + "&price=" + this.price;
+      param["timeInForce"]= this.timeInForce;
     }
-    else if ((this.type == "MARKET") && (this.quoteOrderQty == 0)) {
-      param = param + "&quantity=" + this.quantity;
-    }
-    else if ((this.type == "MARKET") && (this.quoteOrderQty != 0)) {
-      param = param + "&quoteOrderQty=" + this.quoteOrderQty;
-    }
+    // else if ((this.type == "MARKET") && (this.quoteOrderQty != 0)) {
+    //   param["quoteOrderQty"]= this.quoteOrderQty;
+    // }
     else if ((this.type == "STOP_LOSS") || (this.type == "TAKE_PROFIT")) {
-      param = param + "&quantity=" + this.quantity + "&stopPrice=" + this.stopPrice;
+      param["stopPrice"] = this.stopPrice;
     }
     else if ((this.type == "STOP_LOSS_LIMIT") || (this.type == "TAKE_PROFIT_LIMIT")) {
-      param = param + "&timeInForce=" + this.timeInForce + "&quantity=" + this.quantity + "&price=" + this.price + "&stopPrice=" + this.stopPrice;
+      param["timeInForce"]= this.timeInForce;
+      param["stopPrice"] = this.stopPrice;
     }
     else if (this.type == "LIMIT_MAKER") {
-      param = param + "&quantity=" + this.quantity + "&price=" + this.price;
     }
     if (this.newClientOrderId!=""){
-      param=param+"&newClientOrderId="+this.newClientOrderId
+      param["newClientOrderId"]=this.newClientOrderId
     }
-    this.command = "/api/v3/order"
     this.param = param
-    this.pos = 3
+
+    console.log(this.param)
+    let r = undefined
+    if (this.side=="BUY"){
+      r = await bir.binance.buy(this.pair, this.quantity, this.price, this.param, (error, response) => {
+        if (response.orderId==undefined){
+            bir.teleg.text=JSON.stringify(error.body);
+            bir.teleg.telegramSendText();
+        }else{
+          bir.teleg.text=JSON.stringify(response);
+          bir.teleg.telegramSendText();
+        }
+      });
+    }
+    else{
+      r = await bir.binance.sell(this.pair, this.quantity, this.price, this.param, (error, response) => {
+        if (response.orderId==undefined){
+          bir.teleg.text=JSON.stringify(error.body);
+          bir.teleg.telegramSendText();
+  
+        }else{
+          bir.teleg.text=JSON.stringify(response);
+          bir.teleg.telegramSendText();
+        }
+      });
+    }
+    return r
+
   }
   ////закрытие всех ордеров спота по выбранной валютной пары
   BinanceCloseAllOrderSpot() {
-    this.command = "/api/v3/openOrders"
-    this.param = "symbol=" + this.pair
-    this.pos = 4
+    let r =bir.binance.cancelAll(this.pair,(error, response) => {
+      if (response.length==undefined){
+        bir.teleg.text=JSON.stringify(error.body);
+        bir.teleg.telegramSendText();        
+      }
+      else{
+        bir.teleg.text=JSON.stringify(response);
+        bir.teleg.telegramSendText();        
+      }
+    });
+    bir.teleg.text=JSON.stringify("отмена ордера завершена");
+    bir.teleg.telegramSendText();
+    return r
   }
   BinanceCloseOrderIdSpot(){
-      this.command = "/api/v3/order"
-      this.param = "symbol=" + this.pair+"&origClientOrderId="+this.origClientOrderId
-      this.pos = 4
+    let r = bir.binance.cancel(this.pair, this.orderId, (error, response, symbol) => {
+      bir.teleg.text=JSON.stringify(response);
+      bir.teleg.telegramSendText();  
+      return "done close id spot"
+    });
+    return r
   }
   // Информация о пользователе спот
   BinanceAccountInfoSpot() {
@@ -214,28 +286,17 @@ class binanceClass {
   //  метод для получение количество от процента от баланса для спотового рынка
   BinanceQuantityProcSpot() {
     if (this.price == 0) {
-      this.BinanceSymbolOrderBookSpot();
-      let res = this.binanceConnect();
+      if (this.side=="BUY"){
+              this.price=this.global.ticker.spot[this.pair].bestAsk
+      }
+      else if (this.side=="SELL"){
+              this.price=this.global.ticker.spot[this.pair].bestBid
+          }
+  }
 
-      if (this.side == 'BUY') { if (res[0] != undefined) { this.price = res[0]['askPrice']; } else if (res['askPrice'] != undefined) { this.price = res['askPrice']; } }
-      else if (this.side == 'SELL') { if (res[0]!= undefined) { this.price = res[0]['bidPrice']; } else if (res['bidPrice'] != undefined) { this.price = res['bidPrice']; } }
-
-    }
-
-
-    this.BinanceAccountInfoSpot();
-    let res = this.binanceConnect();
-    
     this.quoteOrderQty = 0;
     if(this.side=='BUY'){
-      let balance = 0;
-      for (let i in res['balances']){
-        if (res['balances'][i]['asset']==this.quoteAsset){
-          balance=res['balances'][i]['free'];
-          break;
-        }
-      }
-      
+      let balance = this.global.balance.spot[this.quoteAsset].available
       this.quantity=Number(balance)/(100/Number(this.quantityProc));
       this.quantity=this.quantity/Number(this.price);
 
@@ -243,18 +304,12 @@ class binanceClass {
     else if(this.side=='SELL'){  
 
 
-      let balance = 0;
-      for (let i in res['balances']){
-        if (res['balances'][i]['asset']==this.baseAsset){
-          balance=res['balances'][i]['free'];
-          break;
-        }
-      }
+      let balance = this.global.balance.spot[this.baseAsset].available
       this.quantity=Number(balance)/(100/Number(this.quantityProc));
 
       
     }
-    this.binancefilterStart();
+    this.binancefilterStartSpot();
   }
   
 
@@ -595,7 +650,7 @@ class binanceClass {
 
     
     this.quoteOrderQty = 0;
-    this.binancefilterStart();
+    this.binancefilterStartSpot();
   }
 
   // создание ордера в margin 
@@ -667,9 +722,7 @@ class binanceClass {
       this.baseAsset = this.global.filters.spot[this.pair]['baseAsset'];
       this.quoteAsset = this.global.filters.spot[this.pair]['quoteAsset'];
       // начало фильтрации цена по правилам биржы
-      if (this.typeExchange == '/dapi') {
-        this.contractSize = this.filterDict[this.pair]['contractSize'];
-      }
+
       this.tickSize = Number(this.tickSize).toFixed(8);
       let dot = (this.tickSize).indexOf('.');
       let position = (this.tickSize).indexOf('1');
@@ -894,35 +947,36 @@ binanceStart() {
         this.binancefilterStartSpot();
         if (this.allClose != "false") {
           if (this.allClose=="true"){
-            this.BinanceCloseAllOrderSpot();
+            let r = this.BinanceCloseAllOrderSpot();
             this.updateParametr();
-            return this.binanceConnect();
+            return r
           }
           else if (this.allClose=="order"){
-            this.BinanceCloseOrderIdSpot();
+            let r = this.BinanceCloseOrderIdSpot();
             this.updateParametr();
-            return this.binanceConnect();
+            return r
           }
   
         }
         else {
           if (this.oco=="true"){
-            this.BinanceCreatOrderOcoSpot();
+            let r = this.BinanceCreatOrderOcoSpot();
             this.updateParametr();
-            return this.binanceConnect();
+            return r
           }
           else{
             if(this.quantityProc!=0){
               this.BinanceQuantityProcSpot();
             }
-            this.BinanceCreatOrderSpot();
+            let r = this.BinanceCreatOrderSpot();
             this.updateParametr();
-            return this.binanceConnect();
+            return r
           }
   
   
         }
     }
+    // futures done
     else if (this.marketType == "futures") {
         bir.teleg.text="команда по фьючерсу"
         bir.teleg.telegramSendText();
