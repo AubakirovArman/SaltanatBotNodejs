@@ -1,7 +1,3 @@
-
-
-
-
 var app = require('express')();
 var http=require('http').Server(app);
 var io =require('socket.io')(http);
@@ -24,7 +20,6 @@ binance.options({
     'APISECRET':'you api secret binance',
     reconnect: true ,
   });
-
 // все что ниже трогать нельзя )))
 
 // общая библиотека где есть текущие цены и фильтры
@@ -33,7 +28,8 @@ global.ticker = {};
 global.ticker.spot = {};
 global.ticker.futures = {};
 global.ticker.futuresDapi = {};
-
+global.stat={}
+global.stat["por"]=1
 global.balance = {};
 global.balance.spot = {};
 global.balance.futures = {};
@@ -161,6 +157,41 @@ binance.websockets.bookTickers(obj => {
     global.ticker.spot[obj.symbol] = obj;
 } );
 
+function sum(obj) {
+	return Object.keys(obj).reduce((sum,key)=>sum+parseFloat(obj[key]||0),0);
+  }
+
+
+binance.websockets.depthCache(['CKBUSDT'], (symbol, depth) => {
+	let bids = binance.sortBids(depth.bids);
+	let asks = binance.sortAsks(depth.asks);
+
+	if (sum(bids)>sum(asks)){
+		if (global.stat["por"]==0){
+			global.stat["por"]=1
+			let param={};
+			console.log("buy")
+			param["type"]="MARKET";
+			param["side"]="BUY";
+			binance.buy("CKBUSDT", 800, 0, param)
+		}
+	}else{
+
+		if (global.stat["por"]==1){
+			global.stat["por"]=0
+			let param={};
+			console.log("sell")
+
+			param["type"]="MARKET";
+			param["side"]="SELL";
+			binance.sell("CKBUSDT", 800, 0, param)
+			
+		}
+	}
+
+
+  },100);
+
 
 binance.futuresBookTickerStream( obj => {
     global.ticker.futures[obj.symbol] = obj;
@@ -234,6 +265,7 @@ async function loadbalance(){
 			stat=1
 		}else{
 			global.balance.spot =balances
+
 			console.log('load balance')
 			s=2;
 		}
@@ -249,12 +281,8 @@ loadbalance()
 
 // userDeliveryData
 // userFutureData
-binance.websockets.userDeliveryData(	(bal)=>{
-	console.log('1 del')
-	console.log(bal)
-},
+binance.websockets.userDeliveryData(false,
 (bal)=>{
-	console.log('2 del')
 	for (el in bal.updateData.balances){
 		global.balance.futuresDapi[bal.updateData.balances[el].asset].balance=bal.updateData.balances[el].walletBalance
 		global.balance.futuresDapi[bal.updateData.balances[el].asset].crossWalletBalance=bal.updateData.balances[el].crossWalletBalance
@@ -266,13 +294,8 @@ false
 
 
 binance.websockets.userFutureData(
+	false,
 	(bal)=>{
-		console.log('1futures')
-		console.log(bal)
-	},
-	(bal)=>{
-		console.log('2 futures')
-
 		for (el in bal.updateData.balances){
 			global.balance.futures[bal.updateData.balances[el].asset].balance=bal.updateData.balances[el].walletBalance
 			global.balance.futures[bal.updateData.balances[el].asset].crossWalletBalance=bal.updateData.balances[el].crossWalletBalance
@@ -283,8 +306,6 @@ binance.websockets.userFutureData(
 );
 
 binance.websockets.userData((bal)=>{
-	console.log('1')
-	console.log(bal)
 
 	for (el in bal.B){
 		global.balance.spot[bal.B[el].a].available=bal.B[el].f
@@ -293,10 +314,7 @@ binance.websockets.userData((bal)=>{
 },
 false,
 false,
-(bal)=>{
-	console.log('4')
-	console.log(bal)
-}
+false
 )
 
 
@@ -320,7 +338,7 @@ false,
 
 
 // index page
-var port=80
+var port=8000
 
 
 
