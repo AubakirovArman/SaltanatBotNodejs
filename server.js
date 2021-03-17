@@ -162,37 +162,6 @@ function sum(obj) {
   }
 
 
-binance.websockets.depthCache(['CKBUSDT'], (symbol, depth) => {
-	let bids = binance.sortBids(depth.bids);
-	let asks = binance.sortAsks(depth.asks);
-
-	if (sum(bids)>sum(asks)){
-		if (global.stat["por"]==0){
-			global.stat["por"]=1
-			let param={};
-			console.log("buy")
-			param["type"]="MARKET";
-			param["side"]="BUY";
-			binance.buy("CKBUSDT", 800, 0, param)
-		}
-	}else{
-
-		if (global.stat["por"]==1){
-			global.stat["por"]=0
-			let param={};
-			console.log("sell")
-
-			param["type"]="MARKET";
-			param["side"]="SELL";
-			binance.sell("CKBUSDT", 800, 0, param)
-			
-		}
-	}
-
-
-  },100);
-
-
 binance.futuresBookTickerStream( obj => {
     global.ticker.futures[obj.symbol] = obj;
 
