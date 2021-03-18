@@ -326,7 +326,7 @@ app.post('/id', function(req, res) {
 		console.log(logica)
     })
 
-
+	res.jsonp({'good':"done"})
 });
 
 // about page
