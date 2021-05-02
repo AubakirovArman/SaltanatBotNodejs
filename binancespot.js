@@ -435,10 +435,11 @@ class binanceClass {
         param["reduceOnly"]=this.reduceOnly;
     }
     if (this.positionSide!="BOTH"){
-        param["&positionSide"]= this.positionSide;
+        param["positionSide"]= this.positionSide;
     }
  
     this.param=param
+    console.log(this.param)
     bir.teleg.text=JSON.stringify(this.param)
     bir.teleg.telegramSendText();
 
@@ -481,14 +482,20 @@ class binanceClass {
    ////закрытие ордера по id 
  async BinanceCloseOrderIdFutures() {
     if (this.typeExchange=="/fapi"){
-        let r = await bir.binance.futuresCancel( this.pair, {origClientOrderId: this.origClientOrderId} ) 
+        let params ={}
+        if (this.orderId!=0) {
+          params["orderId"]=this.orderId
+        }else {
+          params["origClientOrderId"]=this.origClientOrderId
+        }
+        let r = await bir.binance.futuresCancel( this.pair, params ) 
         bir.teleg.text=JSON.stringify(r)
         bir.teleg.telegramSendText();
     
         return r
     }
     else if (this.typeExchange=="/dapi"){
-        let r =  await bir.binance.deliveryCancel( this.pair, {origClientOrderId: this.origClientOrderId} ) 
+        let r =  await bir.binance.deliveryCancel( this.pair, params ) 
         bir.teleg.text=JSON.stringify(r)
         bir.teleg.telegramSendText();
     
@@ -1046,6 +1053,3 @@ binanceStart() {
 }
 
 module.exports = binanceClass;
-
-
-
