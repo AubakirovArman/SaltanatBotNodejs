@@ -1,3 +1,7 @@
+
+
+
+
 var app = require('express')();
 var http=require('http').Server(app);
 var io =require('socket.io')(http);
@@ -8,7 +12,9 @@ const binance = new Binance();
 let telegram=require('./telegrammclass')
 
 var teleg =new telegram();
+var settings= {}
 // настройка 
+settings.time=1 //задержка 1 сек 
 
 teleg.status="вкл"
 teleg.id="id you teltegramm"
@@ -18,8 +24,10 @@ teleg.token="token bot telegramm "
 binance.options({
     'APIKEY':'you api key binance',
     'APISECRET':'you api secret binance',
+     useServerTime: true,
     reconnect: true ,
   });
+// все что ниже трогать нельзя )))
 // все что ниже трогать нельзя )))
 
 // общая библиотека где есть текущие цены и фильтры
@@ -36,6 +44,7 @@ global.balance.futures = {};
 global.balance.futuresDapi = {};
 
 // exchange info
+global.settingsTime=settings.time
 
 global.filters={}
 
@@ -75,8 +84,8 @@ async function loadExchangeInfo(){
 				}
 		
 		
-				//filters.baseAssetPrecision = obj.baseAssetPrecision;
-				//filters.quoteAssetPrecision = obj.quoteAssetPrecision;
+				filters.baseAssetPrecision = obj.baseAssetPrecision;
+				filters.quoteAssetPrecision = obj.quoteAssetPrecision;
 				filters.orderTypes = obj.orderTypes;
 				filters.icebergAllowed = obj.icebergAllowed;
 				minimums[obj.symbol] = filters;
@@ -162,6 +171,7 @@ function sum(obj) {
   }
 
 
+
 binance.futuresBookTickerStream( obj => {
     global.ticker.futures[obj.symbol] = obj;
 
@@ -196,9 +206,6 @@ io.sockets.on('connection',function(socket){
 	})
 })
 
-
-
-
 // route
 app.get('/',function(req,res){
 	res.render('pages/index',{
@@ -212,8 +219,9 @@ app.set('view engine', 'ejs');
 
 
 let stat=0
-async function loadbalance(){
 
+
+async function loadbalance(){
 	let r = await binance.deliveryBalance();
 	for (el in r){
 		global.balance.futuresDapi[r[el].asset]=r[el]
@@ -227,29 +235,17 @@ async function loadbalance(){
 
 
 	binance.balance((error, balances) => {
-		if ( error ) {
-			console.info(balances)
-			console.info(error)
-			teleg.text=teleg.text+JSON.stringify(balances)+"\n вам нужно перезапустит node js"
-			stat=1
-		}else{
+		if ( error ) console.error(error);else{
 			global.balance.spot =balances
-
 			console.log('load balance')
 			s=2;
 		}
 	});
-
-
-
 }
-
 
 
 loadbalance()
 
-// userDeliveryData
-// userFutureData
 binance.websockets.userDeliveryData(false,
 (bal)=>{
 	for (el in bal.updateData.balances){
@@ -286,34 +282,12 @@ false,
 false
 )
 
-
-
-
 ///////////////////////////////////
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // index page
-var port=80
+var port=8000
 
-
-
-
-
-app.post('/id', function(req, res) {
+app.post('/iddd', function(req, res) {
     let tagline =req.hostname
     const binancelogica = require('./binancelogica')
     let r=''
@@ -325,8 +299,8 @@ app.post('/id', function(req, res) {
         let logica = binancelogica(r,global);
 		console.log(logica)
     })
-
 	res.jsonp({'good':"done"})
+
 });
 
 // about page
@@ -338,16 +312,8 @@ http.listen(port,function(){
 console.log(port+' is the magic port');
 });
 
-
-
-
-
 teleg.text="Saltanat Bot на node js запущен"
 teleg.telegramSendText()
-
-
-
-
 
 module.exports.binance=binance; 
 module.exports.teleg=teleg; 
